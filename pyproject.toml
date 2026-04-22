@@ -8,6 +8,7 @@ dependencies = [
     "fastapi>=0.136.0",
     "mlflow>=3.11.1",
     "numpy>=2.4.4",
+    "optuna>=4.8.0",
     "pandas>=2.3.3",
     "prefect>=3.6.27",
     "pydantic>=2.13.2",

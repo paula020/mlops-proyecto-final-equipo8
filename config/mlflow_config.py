@@ -1,5 +1,4 @@
 """
-config/mlflow_config.py
 ────────────────────────────────────────────────────────────
 Configuración central de MLflow para el proyecto.
 Crea experimentos, tags estándar y utilidades de logging.
