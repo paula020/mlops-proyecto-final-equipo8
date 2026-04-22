@@ -47,3 +47,37 @@ SVM_PARAMS = {
     "probability": True,
     "random_state": RANDOM_STATE,
 }
+
+# ── Optuna ───────────────────────────
+RANDOM_FOREST_SEARCH_SPACE = {
+    "n_estimators":      (50, 300),
+    "max_depth":         (3, 15),
+    "min_samples_split": (2, 10),
+    "min_samples_leaf":  (1, 5),
+    "max_features":      ["sqrt", "log2"],
+}
+
+XGBOOST_SEARCH_SPACE = {
+    "n_estimators":  (50, 300),
+    "max_depth":     (3, 10),
+    "learning_rate": (0.01, 0.3),
+    "subsample":     (0.6, 1.0),
+    "colsample_bytree": (0.6, 1.0),
+    "reg_alpha":     (0.0, 1.0),
+    "reg_lambda":    (0.5, 2.0),
+}
+
+LOGISTIC_REGRESSION_SEARCH_SPACE = {
+    "C":       (0.01, 10.0),
+    "penalty": ["l1", "l2"],
+    "solver":  ["liblinear", "saga"],
+}
+
+SVM_SEARCH_SPACE = {
+    "C":     (0.1, 10.0),
+    "gamma": ["scale", "auto"],
+    "kernel": ["rbf", "poly"],
+}
+
+# Número de trials por modelo
+OPTUNA_N_TRIALS = 30
