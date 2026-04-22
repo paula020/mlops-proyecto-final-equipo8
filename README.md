@@ -210,3 +210,21 @@ uv run python -c "from src.data import load_dataset; from src.features import ad
 
 **Conclusión**: Random Forest es el candidato seleccionado para la siguiente fase (Experiment Tracking con MLflow).
 
+### 8. Levantar MLflow
+```bash
+mlflow server --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root ./mlflow/artefactos --host 127.0.0.1 --port 5000
+```
+UI disponible en: http://127.0.0.1:5000
+
+### 9. Correr experimentos
+
+```bash
+# Validar configuración MLflow
+python scripts/validate_mlflow_setup.py
+
+# Experimentos baseline
+python scripts/experimentos_iniciales.py
+
+# Tuning de hiperparámetros
+python scripts/hyperparameter_tuning.py
+```
