@@ -12,6 +12,7 @@ CV_FOLDS     = 5
 # ── Columnas ──────────────────────────────────────────────
 TARGET    = "loan_status"
 DROP_COLS = ["loan_id"]
+NEGATIVE_VALUE_COLS = ["residential_assets_value"]
 CAT_COLS  = ["education", "self_employed"]
 NUM_COLS  = [
     "no_of_dependents", "income_annum", "loan_amount",
@@ -81,3 +82,6 @@ SVM_SEARCH_SPACE = {
 
 # Número de trials por modelo
 OPTUNA_N_TRIALS = 30
+
+# ── Training Pipeline ─────────────────────────────────────
+DEFAULT_MODEL = "xgboost"   # opciones: xgboost, random_forest, svm, logistic_regression
