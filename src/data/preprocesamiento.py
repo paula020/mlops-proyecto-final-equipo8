@@ -41,7 +41,9 @@ def clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
                     f"  {col}: {n_negative} valores negativos "
                     f"reemplazados por 0"
                 )
-                mlflow.log_metric(f"negative_values_{col}", int(n_negative))
+                # Después — solo loggea si hay un run activo
+                if mlflow.active_run():
+                    mlflow.log_metric(f"negative_values_{col}", int(n_negative))
                 df[col] = df[col].clip(lower=0)
 
     return df

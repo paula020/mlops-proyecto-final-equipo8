@@ -146,7 +146,7 @@ def run_etl(
     )
 
     logger.info("=" * 55)
-    logger.info("  ETL Pipeline — Credit Approval MLOps")
+    logger.info("  ETL Pipeline — Aprobación de crédito MLOps")
     logger.info("=" * 55)
 
     # Extract
