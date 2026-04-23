@@ -3,6 +3,8 @@ Configuración central del proyecto. Modifica este archivo
 para cambiar hiperparámetros, splits y columnas sin tocar
 el código de los scripts.
 """
+import os
+from pathlib import Path
 
 # ── Data ──────────────────────────────────────────────────
 TEST_SIZE    = 0.2
@@ -12,6 +14,7 @@ CV_FOLDS     = 5
 # ── Columnas ──────────────────────────────────────────────
 TARGET    = "loan_status"
 DROP_COLS = ["loan_id"]
+NEGATIVE_VALUE_COLS = ["residential_assets_value"]
 CAT_COLS  = ["education", "self_employed"]
 NUM_COLS  = [
     "no_of_dependents", "income_annum", "loan_amount",
@@ -81,3 +84,15 @@ SVM_SEARCH_SPACE = {
 
 # Número de trials por modelo
 OPTUNA_N_TRIALS = 30
+
+# ── Training Pipeline ─────────────────────────────────────
+DEFAULT_MODEL = "xgboost"   # opciones: xgboost, random_forest, svm, logistic_regression
+
+# ── Scheduling ────────────────────────────────────────────
+CRON_ENTRENAMIENTO = "*/5 * * * *"  # Cada día a las 6:00 PM
+TIMEZONE           = "America/Bogota"
+
+# ── Rutas ETL ─────────────────────────────────────────────────
+RAW_DATA_PATH       = os.getenv("DATA_PATH", "data/raw/loan_approval_dataset.csv")
+PROCESSED_DATA_DIR  = Path("data/processed")
+PROCESSED_DATA_PATH = PROCESSED_DATA_DIR / "loan_approval_processed.csv"

@@ -216,7 +216,18 @@ mlflow server --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-
 ```
 UI disponible en: http://127.0.0.1:5000
 
-### 9. Correr experimentos
+### 9. Levantar Prefect
+```bash
+prefect server start
+```
+UI disponible en: http://127.0.0.1:4200
+
+> Se requiere 3 terminales corriendo en paralelo:
+> 1. MLflow server
+> 2. Prefect server  
+> 3. Ejecución de scripts
+
+### 10. Correr experimentos
 
 ```bash
 # Validar configuración MLflow
