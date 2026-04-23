@@ -3,6 +3,8 @@ Configuración central del proyecto. Modifica este archivo
 para cambiar hiperparámetros, splits y columnas sin tocar
 el código de los scripts.
 """
+import os
+from pathlib import Path
 
 # ── Data ──────────────────────────────────────────────────
 TEST_SIZE    = 0.2
@@ -89,3 +91,8 @@ DEFAULT_MODEL = "xgboost"   # opciones: xgboost, random_forest, svm, logistic_re
 # ── Scheduling ────────────────────────────────────────────
 CRON_ENTRENAMIENTO = "*/5 * * * *"  # Cada día a las 6:00 PM
 TIMEZONE           = "America/Bogota"
+
+# ── Rutas ETL ─────────────────────────────────────────────────
+RAW_DATA_PATH       = os.getenv("DATA_PATH", "data/raw/loan_approval_dataset.csv")
+PROCESSED_DATA_DIR  = Path("data/processed")
+PROCESSED_DATA_PATH = PROCESSED_DATA_DIR / "loan_approval_processed.csv"
