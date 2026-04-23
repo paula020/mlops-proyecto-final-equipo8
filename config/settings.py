@@ -85,3 +85,7 @@ OPTUNA_N_TRIALS = 30
 
 # ── Training Pipeline ─────────────────────────────────────
 DEFAULT_MODEL = "xgboost"   # opciones: xgboost, random_forest, svm, logistic_regression
+
+# ── Scheduling ────────────────────────────────────────────
+CRON_ENTRENAMIENTO = "*/5 * * * *"  # Cada día a las 6:00 PM
+TIMEZONE           = "America/Bogota"
