@@ -29,7 +29,7 @@ EXPERIMENTS = {
 }
 
 DEFAULT_TAGS = {
-    "project": "credit_approval",
+    "project": "Aprobación créditos",
     "team":    "mlops",
     "task":    "binary_classification",
 }
