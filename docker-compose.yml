@@ -1,0 +1,83 @@
+# ─────────────────────────────────────────────────────────
+#  docker-compose.yml — Credit Approval MLOps
+#  Proyecto MLOps - Equipo 8
+#
+#  Levanta:
+#    - mlflow   → tracking server  (puerto 5000)
+#    - api      → FastAPI          (puerto 8000)
+#
+#  Uso:
+#    docker compose up --build          # primera vez
+#    docker compose up -d               # en background
+#    docker compose down                # bajar todo
+# ─────────────────────────────────────────────────────────
+
+services:
+
+  # ── MLflow Tracking Server ──────────────────────────────
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest
+    container_name: mlflow-server
+    ports:
+      - "5000:5000"
+    volumes:
+      # Persiste los runs y artefactos en tu máquina local
+      - ./mlruns:/mlflow/mlruns
+      - ./models:/mlflow/models
+    environment:
+      - MLFLOW_BACKEND_STORE_URI=sqlite:///mlflow/mlruns/mlflow.db
+      - MLFLOW_DEFAULT_ARTIFACT_ROOT=/mlflow/mlruns
+    command: >
+      mlflow server
+        --backend-store-uri sqlite:///mlflow/mlruns/mlflow.db
+        --default-artifact-root /mlflow/mlruns
+        --host 127.0.0.1
+        --port 5000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - mlops-network
+
+  # ── FastAPI — Credit Approval API ──────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: final
+    container_name: credit-approval-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MODEL_NAME=credit_approval_model
+      - MODEL_STAGE=Production
+      - DATA_PATH=data/raw/loan_approval_dataset.csv
+    volumes:
+      # Monta los datos locales para no copiarlos en cada build
+      - ./data:/app/data:ro
+    depends_on:
+      mlflow:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - mlops-network
+    restart: on-failure
+
+# ── Red compartida ──────────────────────────────────────
+networks:
+  mlops-network:
+    driver: bridge
+
+# ── Volúmenes persistentes ──────────────────────────────
+volumes:
+  mlruns:
+  models:
