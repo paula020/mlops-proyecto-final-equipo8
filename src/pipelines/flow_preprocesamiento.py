@@ -116,7 +116,7 @@ def task_log_mlflow(df: pd.DataFrame, X_train, X_test) -> None:
 
 
 # ── Flow principal ────────────────────────────────────────
-DATA_PATH_DEFAULT = os.getenv("DATA_PATH", "data/raw/loan_approval_dataset.csv")
+DATA_PATH_DEFAULT = os.getenv("DATA_PATH", "data/loan_approval_dataset.csv")
 
 @flow(
     name="Preprocesamiento aprobación de créditos",

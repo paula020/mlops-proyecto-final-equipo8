@@ -31,10 +31,10 @@ services:
       mlflow server
         --backend-store-uri sqlite:///mlflow/mlruns/mlflow.db
         --default-artifact-root /mlflow/mlruns
-        --host 127.0.0.1
+        --host 0.0.0.0
         --port 5000
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/2.0/mlflow/experiments/list"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -55,13 +55,12 @@ services:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
       - MODEL_NAME=credit_approval_model
       - MODEL_STAGE=Production
-      - DATA_PATH=data/raw/loan_approval_dataset.csv
+      - DATA_PATH=data/loan_approval_dataset.csv
     volumes:
       # Monta los datos locales para no copiarlos en cada build
       - ./data:/app/data:ro
     depends_on:
-      mlflow:
-        condition: service_healthy
+      - mlflow
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s

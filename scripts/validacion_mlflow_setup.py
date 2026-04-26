@@ -86,7 +86,7 @@ def run_smoke_test():
     logger.info(f"  ROC AUC : {metrics.get('test_roc_auc', 0):.4f}")
     logger.info(f"  UI      : {TRACKING_URI}")
     logger.info("=" * 50)
-    logger.info(" Revisa el run en http://127.0.0.1:5000")
+    logger.info(" Revisa el run en http://localhost:5000")
 
 
 if __name__ == "__main__":

@@ -93,6 +93,6 @@ CRON_ENTRENAMIENTO = "*/5 * * * *"  # Cada día a las 6:00 PM
 TIMEZONE           = "America/Bogota"
 
 # ── Rutas ETL ─────────────────────────────────────────────────
-RAW_DATA_PATH       = os.getenv("DATA_PATH", "data/raw/loan_approval_dataset.csv")
+RAW_DATA_PATH       = os.getenv("DATA_PATH", "data/loan_approval_dataset.csv")
 PROCESSED_DATA_DIR  = Path("data/processed")
 PROCESSED_DATA_PATH = PROCESSED_DATA_DIR / "loan_approval_processed.csv"

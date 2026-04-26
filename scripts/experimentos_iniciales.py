@@ -140,7 +140,7 @@ def run_experiment(model_name: str, model, X_train, X_test, y_train, y_test, df)
 
 def main():
     import os
-    data_path = os.getenv("DATA_PATH", "data/raw/credit_data.csv")
+    data_path = os.getenv("DATA_PATH", "data/loan_approval_dataset.csv")
 
     logger.info("=" * 55)
     logger.info("  Experimentos Iniciales — Credit Approval MLOps")
@@ -185,7 +185,7 @@ def main():
             f"F1: {metrics.get('test_f1', 0):.4f}"
         )
     logger.info("=" * 55)
-    logger.info("  👉 Compara los runs en http://127.0.0.1:5000")
+    logger.info("  👉 Compara los runs en http://localhost:5000")
 
 
 if __name__ == "__main__":

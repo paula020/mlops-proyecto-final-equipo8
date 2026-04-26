@@ -18,7 +18,7 @@ load_dotenv()
 logger = logging.getLogger(__name__)
 
 # ── Constantes ────────────────────────────────────────────
-TRACKING_URI    = os.getenv("MLFLOW_TRACKING_URI", "sqlite:///mlflow/mlflow.db")
+TRACKING_URI    = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 EXPERIMENT_NAME = os.getenv("MLFLOW_EXPERIMENT_NAME", "Aprobación creditos")
 
 EXPERIMENTS = {

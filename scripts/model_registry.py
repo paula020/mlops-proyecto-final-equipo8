@@ -224,7 +224,7 @@ def main():
         stage      = "Production " if version == best_version else "Staging "
         logger.info(f"  v{version} {model_type:<25} ROC AUC: {roc_auc:.4f} → {stage}")
     logger.info("=" * 55)
-    logger.info("   Revisa el registry en http://127.0.0.1:5000/#/models")
+    logger.info("   Revisa el registry en http://localhost:5000/#/models")
 
 
 if __name__ == "__main__":

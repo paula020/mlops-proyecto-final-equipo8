@@ -59,7 +59,7 @@ COPY data/      ./data/
 ENV MLFLOW_TRACKING_URI="http://mlflow:5000" \
     MODEL_NAME="credit_approval_model"       \
     MODEL_STAGE="Production"                 \
-    DATA_PATH="data/raw/loan_approval_dataset.csv"
+    DATA_PATH="data/loan_approval_dataset.csv"
 
 # Puerto expuesto
 EXPOSE 8000
@@ -70,6 +70,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
 
 # Comando de arranque
 CMD ["uvicorn", "src.api.main:app", \
-     "--host", "127.0.0.1",           \
+     "--host", "0.0.0.0",           \
      "--port", "8000",              \
      "--log-level", "info"]

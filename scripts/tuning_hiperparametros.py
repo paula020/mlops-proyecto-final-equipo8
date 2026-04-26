@@ -230,7 +230,7 @@ def _build_best_model(model_name: str, params: dict):
 
 def main():
     import os
-    data_path = os.getenv("DATA_PATH", "data/raw/credit_data.csv")
+    data_path = os.getenv("DATA_PATH", "data/loan_approval_dataset.csv")
 
     logger.info("=" * 55)
     logger.info("  Hyperparameter Tuning — Credit Approval MLOps")
@@ -278,7 +278,7 @@ def main():
             f"F1: {metrics.get('test_f1', 0):.4f}"
         )
     logger.info("=" * 55)
-    logger.info("   Revisa los runs en http://127.0.0.1:5000")
+    logger.info("   Revisa los runs en http://localhost:5000")
 
 
 if __name__ == "__main__":

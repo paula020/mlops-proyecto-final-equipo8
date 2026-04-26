@@ -35,7 +35,7 @@ def deploy_training_flow():
     print(f"  Schedule  : Cada día a las 6:00 PM")
     print(f"  Cron      : {CRON_ENTRENAMIENTO}")
     print("=" * 55)
-    print("   Revisa los deploys en http://127.0.0.1:4200/deployments")
+    print("   Revisa los deploys en http://0.0.0.0:4200/deployments")
     print("  Ctrl+C para detener")
     print("=" * 55)
 

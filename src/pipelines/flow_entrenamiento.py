@@ -44,7 +44,7 @@ MODELS = {
     "svm":                 SVC(**SVM_PARAMS),
 }
 
-DATA_PATH_DEFAULT = os.getenv("DATA_PATH", "data/raw/loan_approval_dataset.csv")
+DATA_PATH_DEFAULT = os.getenv("DATA_PATH", "data/loan_approval_dataset.csv")
 
 
 # ── Tasks ─────────────────────────────────────────────────
