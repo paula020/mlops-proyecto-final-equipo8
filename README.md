@@ -85,13 +85,13 @@ El MVP incluirá:
 | Fase / Tarea | Responsable principal | Estado esperado |
 |---|---|---|
 | Selección del dataset y definición del problema | Equipo | Completado |
-| EDA, calidad de datos, preprocesamiento y feature engineering | Paula Carolina Barrera Camargo | En desarrollo |
-| Baseline y tests de datos | Paula Carolina Barrera Camargo | En desarrollo |
-| Experiment tracking con MLflow | Mateo Atehortua Arango | Pendiente |
-| Pipeline de entrenamiento y orquestación | Mateo Atehortua Arango | Pendiente |
-| API de despliegue y validación de inputs | Cristian Camilo Avila Pinto | Pendiente |
-| Propuesta de monitoreo y documentación de operación | pendiente | Pendiente |
-| Integración final, pruebas end-to-end y revisión README | Equipo | Pendiente |
+| EDA, calidad de datos, preprocesamiento y feature engineering | Paula Carolina Barrera Camargo | Completado |
+| Baseline y tests de datos | Paula Carolina Barrera Camargo | Completado |
+| Experiment tracking con MLflow | Mateo Atehortua Arango | Completado |
+| Pipeline de entrenamiento y orquestación | Mateo Atehortua Arango | Completado |
+| API de despliegue y validación de inputs | Cristian Camilo Avila Pinto | Completado|
+| Propuesta de monitoreo y documentación de operación | Paula Carolina Barrera Camargo | Completado |
+| Integración final, pruebas end-to-end y revisión README | Equipo | Completado|
 
 ## Estructura del Repositorio
 
@@ -239,3 +239,101 @@ python scripts/experimentos_iniciales.py
 # Tuning de hiperparámetros
 python scripts/hyperparameter_tuning.py
 ```
+
+## Fase 5: Monitoreo (Diseño inicial)
+
+Implementa detección de drift en datos de entrada y en distribución de predicciones,
+sin depender de herramientas externas (solo NumPy y pandas).
+
+| Archivo | Responsabilidad |
+|---|---|
+| `src/monitoring/drift_detector.py` | PSI para features numéricas, TVD para categóricas y predicciones |
+| `src/monitoring/report.py` | Exporta reporte JSON + HTML legible |
+| `scripts/run_monitoring_snapshot.py` | CLI ejecutable con modo simulación y modo real |
+| `docs/monitoring_proposal.md` | Propuesta formal: riesgos, umbrales y criterios de decisión |
+
+### Modo simulación 
+
+Simula un batch con drift moderado: `loan_amount` +20%, `cibil_score` -25 pts,
+`self_employed` 100% Yes, y deterioro de cartera (más rechazos).
+
+```bash
+python scripts/run_monitoring_snapshot.py
+```
+
+### Modo real 
+
+```bash
+python scripts/run_monitoring_snapshot.py \
+  --reference-path data/loan_approval_dataset.csv \
+  --current-path data/current_batch.csv \
+  --output-dir artifacts/monitoring
+```
+
+### Salidas
+
+- `artifacts/monitoring/drift_report.json` — reporte  por feature
+- `artifacts/monitoring/drift_report.html` — reporte visual en HTML
+
+
+| Indicador | Umbral | Acción recomendada |
+|---|---|---|
+| PSI feature numérica | >= 0.20 | Revisar distribución; posible retraining |
+| TVD feature categórica | >= 0.15 | Investigar sesgo de selección |
+| TVD prediction drift | >= 0.10 | Alerta de degradación del modelo |
+| Drift ratio > 30% | > 0.30 | Abrir incidente de datos |
+| Drift en features críticas (`cibil_score`, `income_annum`) 2 runs consecutivos | — | Programar retraining |
+
+## Fase 6: Testing y Best Practices
+
+### Testing
+
+Se implementaron tests unitarios para los módulos principales del proyecto.
+Todos los tests se ejecutan con:
+
+```bash
+uv run pytest tests/ -v
+```
+
+| Archivo de test | Qué valida |
+|---|---|
+| `tests/unit/test_preprocessing.py` | `split_features_target` y `build_preprocessor` |
+| `tests/unit/test_feature_engineering.py` | Creación de features derivadas (`total_assets`, ratios, etc.) |
+| `tests/unit/test_data_quality.py` | Reglas de calidad sobre el dataset |
+| `tests/unit/test_baseline.py` | Entrenamiento de modelos baseline |
+| `tests/unit/test_monitoring.py` | PSI, TVD y prediction drift del módulo de monitoreo |
+
+### Code Quality
+
+El proyecto usa ruff como linter (equivalente a flake8 + isort) y black como formatter, ambos configurados en `pyproject.toml`.
+
+```bash
+# Revisar errores de estilo e imports
+uv run ruff check src/ tests/ scripts/
+
+# Formatear automáticamente
+uv run black src/ tests/ scripts/
+```
+
+### Pre-commit Hooks
+
+Los hooks se instalan una sola vez y se ejecutan en cada `git commit`:
+
+```bash
+# Instalar 
+uv run pre-commit install
+
+# Ejecutar manualmente sobre todos los archivos
+uv run pre-commit run --all-files
+```
+
+Los hooks configurados en `.pre-commit-config.yaml` ejecutan ruff, black y validaciones básicas de archivos YAML, conflictos de merge, espacios sobrantes
+
+### Documentación
+
+| Documento | Contenido |
+|---|---|
+| `README.md` | Guía del proyecto |
+| `docs/monitoring_proposal.md` | Propuesta de monitoreo con umbrales y criterios |
+| `docs/deployment_guide.md` | Guía paso a paso para deployment local y con Docker |
+| `http://localhost:8000/docs` | Documentación interactiva de la API Swagger UI, disponible con la API corriendo |
