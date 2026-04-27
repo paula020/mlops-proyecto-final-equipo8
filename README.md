@@ -242,15 +242,12 @@ python scripts/hyperparameter_tuning.py
 
 ## Fase 5: Monitoreo (Diseño inicial)
 
-Implementa detección de drift en datos de entrada y en distribución de predicciones,
-sin depender de herramientas externas (solo NumPy y pandas).
-
 | Archivo | Responsabilidad |
 |---|---|
 | `src/monitoring/drift_detector.py` | PSI para features numéricas, TVD para categóricas y predicciones |
 | `src/monitoring/report.py` | Exporta reporte JSON + HTML legible |
 | `scripts/run_monitoring_snapshot.py` | CLI ejecutable con modo simulación y modo real |
-| `docs/monitoring_proposal.md` | Propuesta formal: riesgos, umbrales y criterios de decisión |
+| `docs/monitoring_proposal.md` | Propuesta: riesgos, umbrales y criterios de decisión |
 
 ### Modo simulación 
 
