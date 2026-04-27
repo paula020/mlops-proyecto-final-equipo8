@@ -51,14 +51,16 @@ services:
     container_name: credit-approval-api
     ports:
       - "8000:8000"
+    command: >
+      sh -c "sleep 15 && uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --log-level info"
     environment:
-      - MLFLOW_TRACKING_URI=http://mlflow:5000
+      - MLFLOW_TRACKING_URI=sqlite:////mlflow/mlruns/mlflow.db
       - MODEL_NAME=credit_approval_model
       - MODEL_STAGE=Production
       - DATA_PATH=data/loan_approval_dataset.csv
     volumes:
-      # Monta los datos locales para no copiarlos en cada build
       - ./data:/app/data:ro
+      - ./mlruns:/mlflow/mlruns:ro
     depends_on:
       - mlflow
     healthcheck:
