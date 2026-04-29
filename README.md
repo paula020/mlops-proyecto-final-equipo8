@@ -99,6 +99,9 @@ El MVP incluirá:
 mlops-proyecto-final-equipo8/
 ├── README.md
 ├── pyproject.toml
+├── Dockerfile
+├── docker-compose.yml
+├── .dockerignore
 ├── .github/
 ├── configs/
 ├── data/
@@ -109,6 +112,9 @@ mlops-proyecto-final-equipo8/
 │   ├── features/
 │   ├── models/
 │   ├── api/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   └── schemas.py
 │   ├── monitoring/
 │   └── pipeline/
 └── tests/
@@ -212,9 +218,13 @@ uv run python -c "from src.data import load_dataset; from src.features import ad
 
 ### 8. Levantar MLflow
 ```bash
-mlflow server --backend-store-uri sqlite:///mlflow/mlflow.db --default-artifact-root ./mlflow/artefactos --host 127.0.0.1 --port 5000
+# Linux/Mac:
+mlflow server --backend-store-uri sqlite:///mlruns/mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
+
+# Windows PowerShell (usar uv run):
+uv run mlflow server --backend-store-uri sqlite:///mlruns/mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
 ```
-UI disponible en: http://127.0.0.1:5000
+UI disponible en: http://localhost:5000
 
 ### 9. Levantar Prefect
 ```bash
@@ -239,6 +249,173 @@ python scripts/experimentos_iniciales.py
 # Tuning de hiperparámetros
 python scripts/hyperparameter_tuning.py
 ```
+
+---
+
+## Fase 4: Deployment — Containerización y API REST
+
+La Fase 4 empaqueta la API de predicción y MLflow en contenedores Docker para que el sistema sea reproducible y portable.
+
+### Archivos creados en esta fase
+
+| Archivo | Ubicación | Descripción |
+|---|---|---|
+| `Dockerfile` | raíz del proyecto | Build multi-stage con `uv` — construye la imagen de la API |
+| `docker-compose.yml` | raíz del proyecto | Orquesta la API y MLflow en la misma red |
+| `.dockerignore` | raíz del proyecto | Excluye `.venv`, notebooks y logs del build |
+| `main.py` | `src/api/` | App FastAPI con todos los endpoints |
+| `schemas.py` | `src/api/` | Validación de inputs y outputs con Pydantic |
+
+### Prerequisitos
+
+- Docker Desktop instalado y corriendo (ícono verde en la barra de tareas)
+- El dataset en `data/raw/loan_approval_dataset.csv`
+
+### Paso 1 — Registrar el modelo en MLflow
+
+Antes de levantar Docker, el modelo debe estar entrenado y registrado. Con MLflow corriendo localmente:
+
+```bash
+# Windows PowerShell:
+uv run mlflow server --backend-store-uri sqlite:///mlruns/mlflow.db --default-artifact-root ./mlruns --host 0.0.0.0 --port 5000
+```
+
+En otra terminal, entrenar y registrar el modelo:
+
+```bash
+uv run python train_simple.py
+```
+
+Luego abrir http://localhost:5000 → **Models** → `credit_approval_model` → cambiar Stage a **Production**.
+
+Una vez promovido, detener el MLflow local (Ctrl+C) — Docker levantará el suyo propio con los mismos datos.
+
+### Paso 2 — Levantar todo con Docker Compose
+
+```bash
+# Primera vez (construye la imagen, tarda 2-3 minutos):
+docker compose up --build
+
+# Veces siguientes (sin rebuild):
+docker compose up -d
+
+# Si se modificó código, siempre rebuild:
+docker compose up --build
+
+# Bajar todos los contenedores:
+docker compose down
+```
+
+> **Nota Windows PowerShell:** el operador `\` para continuar líneas no funciona. Usar todo en una sola línea o con el backtick `` ` ``.
+
+### Paso 3 — Verificar que los servicios están activos
+
+```bash
+docker compose ps
+```
+
+Resultado esperado:
+
+```
+NAME                  STATUS          PORTS
+credit-approval-api   Up (healthy)    0.0.0.0:8000->8000/tcp
+mlflow-server         Up              0.0.0.0:5000->5000/tcp
+```
+
+Ver logs en tiempo real:
+
+```bash
+docker compose logs -f api      # solo la API
+docker compose logs -f mlflow   # solo MLflow
+docker compose logs -f          # ambos
+```
+
+### Paso 4 — Probar la API
+
+**Opción A — Swagger UI (recomendado, desde el navegador):**
+
+Abrir http://localhost:8000/docs → clic en `POST /predict` → `Try it out` → `Execute`
+
+**Opción B — PowerShell:**
+
+```powershell
+# Health check
+Invoke-RestMethod -Uri http://localhost:8000/health
+
+# Predicción individual
+Invoke-RestMethod -Uri http://localhost:8000/predict -Method Post -ContentType "application/json" -Body '{
+  "no_of_dependents": 2,
+  "income_annum": 5800000,
+  "loan_amount": 12000000,
+  "loan_term": 10,
+  "cibil_score": 720,
+  "residential_assets_value": 8000000,
+  "commercial_assets_value": 2000000,
+  "luxury_assets_value": 500000,
+  "bank_asset_value": 3000000,
+  "education": "Graduate",
+  "self_employed": "No"
+}'
+```
+
+**Opción C — Python:**
+
+```bash
+uv run python - <<'EOF'
+import requests
+
+print(requests.get("http://localhost:8000/health").json())
+
+payload = {
+    "no_of_dependents": 2, "income_annum": 5800000,
+    "loan_amount": 12000000, "loan_term": 10, "cibil_score": 720,
+    "residential_assets_value": 8000000, "commercial_assets_value": 2000000,
+    "luxury_assets_value": 500000, "bank_asset_value": 3000000,
+    "education": "Graduate", "self_employed": "No"
+}
+print(requests.post("http://localhost:8000/predict", json=payload).json())
+EOF
+```
+
+### Endpoints disponibles
+
+| Método | Ruta | Descripción |
+|---|---|---|
+| GET | `/` | Info básica de la API |
+| GET | `/health` | Estado del modelo cargado |
+| GET | `/model/info` | Parámetros del modelo activo |
+| POST | `/predict` | Predicción individual |
+| POST | `/predict/batch` | Predicciones en lote (máx. 100) |
+
+### Respuesta esperada de `/predict`
+
+```json
+{
+  "aprobado": true,
+  "probabilidad": 0.8732,
+  "etiqueta": "Approved",
+  "score": 720
+}
+```
+
+### Modo degradado
+
+Si el modelo no está en stage `Production` al arrancar, la API levanta igual pero:
+- `/health` retorna `"status": "degradado"`
+- `/predict` y `/predict/batch` retornan error `503`
+- `/` y `/model/info` siguen funcionando
+
+Para solucionarlo: promover el modelo en http://localhost:5000 → Models → Production, luego `docker compose restart api`.
+
+### URLs de los servicios con Docker
+
+| Servicio | URL |
+|---|---|
+| API de predicción | http://localhost:8000 |
+| Swagger UI | http://localhost:8000/docs |
+| MLflow UI | http://localhost:5000 |
+
+---
 
 ## Fase 5: Monitoreo (Diseño inicial)
 
@@ -333,4 +510,5 @@ Los hooks configurados en `.pre-commit-config.yaml` ejecutan ruff, black y valid
 | `README.md` | Guía del proyecto |
 | `docs/monitoring_proposal.md` | Propuesta de monitoreo con umbrales y criterios |
 | `docs/deployment_guide.md` | Guía paso a paso para deployment local y con Docker |
+| `docs/FASE4_README.md` | Detalle técnico de la API y Docker |
 | `http://localhost:8000/docs` | Documentación interactiva de la API Swagger UI, disponible con la API corriendo |
